@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenCV with Flask and ESP32 Control</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #video-container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        #video-feed {
+            width: 100%;
+            height: auto;
+        }
+
+        #control-buttons {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+    </div>
+
+    <div id="control-buttons">
+        <button onclick="turnOnLight()">Turn On Light</button>
+        <button onclick="turnOffLight()">Turn Off Light</button>
+        <button onclick="toggleAnotherLed()">Toggle Another LED</button>
+        <!-- New buttons for face recognition actions -->
+        <button onclick="reRecognizeFaces()">Re-Recognize Faces</button>
+        <button onclick="storeFace()">Store Face</button>
+        <!-- Input field for the face name -->
+        <input type="text" id="faceNameInput" placeholder="Enter Face Name">
+    </div>
+
+    <script>
+        function turnOnLight() {
+            // Use AJAX or other methods to send a request to turn on the light
+            alert('Turning on light...');
+        }
+
+        function turnOffLight() {
+            // Use AJAX or other methods to send a request to turn off the light
+            alert('Turning off light...');
+        }
+
+        function toggleAnotherLed() {
+            // Use AJAX or other methods to send a request to toggle another LED
+            alert('Toggling another LED...');
+        }
+
+        // New JavaScript functions for face recognition actions
+        function reRecognizeFaces() {
+            // Use AJAX or other methods to send a request for re-recognizing faces
+            alert('Re-recognizing faces...');
+        }
+        function storeFace() {
+            // Get the face name from the input field
+            let faceName = document.getElementById("faceNameInput").value;
+
+            if (!faceName) {
+                alert('Please enter a face name');
+                return;
+            }
+
+            // Use AJAX or other methods to send a request for storing a face with the provided name
+            alert('Storing face...');
+            // Example using fetch API
+            fetch('/store_face', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'face_name=' + encodeURIComponent(faceName),
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
