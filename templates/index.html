@@ -7,59 +7,146 @@
     <title>OpenCV with Flask and ESP32 Control</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        #video-container {
+        #container {
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
+            text-align: center;
         }
 
         #video-feed {
             width: 100%;
-            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        #control-buttons {
+        button {
             margin-top: 20px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        input[type="text"] {
+            padding: 12px 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #aaa;
         }
     </style>
 </head>
 <body>
-    <div id="video-container">
+    <div id="container">
         <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
-    </div>
-
-    <div id="control-buttons">
         <button onclick="turnOnLight()">Turn On Light</button>
         <button onclick="turnOffLight()">Turn Off Light</button>
         <button onclick="toggleAnotherLed()">Toggle Another LED</button>
-        <!-- New buttons for face recognition actions -->
+        <label for="faceNameInput"></label><input type="text" id="faceNameInput" placeholder="Enter Face Name">
+        <div></div>
         <button onclick="reRecognizeFaces()">Re-Recognize Faces</button>
         <button onclick="storeFace()">Store Face</button>
-        <!-- Input field for the face name -->
-        <input type="text" id="faceNameInput" placeholder="Enter Face Name">
     </div>
 
     <script>
         function turnOnLight() {
-            // Use AJAX or other methods to send a request to turn on the light
-            alert('Turning on light...');
+            // Assuming you want to turn on the light with a POST request
+            fetch('http://192.168.1.22/api/turn_on_light', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded', // Set the content type based on your server's expectations
+                    // Add any other headers if needed
+                },
+                // You can pass data in the body if required
+                // body: JSON.stringify({ key1: 'value1', key2: 'value2' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                //alert('Turning on light...');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                //alert('Failed to turn on light.');
+            });
+           // alert('Turning on light...');
         }
 
         function turnOffLight() {
-            // Use AJAX or other methods to send a request to turn off the light
-            alert('Turning off light...');
+            /// Assuming you want to turn on the light with a POST request
+            fetch('http://192.168.1.22/api/turn_off_light', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded', // Set the content type based on your server's expectations
+                    // Add any other headers if needed
+                },
+                // You can pass data in the body if required
+                // body: JSON.stringify({ key1: 'value1', key2: 'value2' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                //alert('Turning on light...');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                //alert('Failed to turn on light.');
+            });
+            //alert('Turning off light...');
         }
 
         function toggleAnotherLed() {
             // Use AJAX or other methods to send a request to toggle another LED
-            alert('Toggling another LED...');
+            //alert('Toggling another LED...');
+                        /// Assuming you want to turn on the light with a POST request
+            fetch('http://192.168.1.22/api/toggle_light', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded', // Set the content type based on your server's expectations
+                    // Add any other headers if needed
+                },
+                // You can pass data in the body if required
+                // body: JSON.stringify({ key1: 'value1', key2: 'value2' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                //alert('Turning on light...');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                //alert('Failed to turn on light.');
+            });
+            //alert('Turning off light...');
         }
 
         // New JavaScript functions for face recognition actions
