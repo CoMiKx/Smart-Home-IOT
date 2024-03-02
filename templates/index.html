@@ -89,17 +89,18 @@
                 // You can pass data in the body if required
                 // body: JSON.stringify({ key1: 'value1', key2: 'value2' })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                //alert('Turning on light...');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                //alert('Failed to turn on light.');
-            });
-           // alert('Turning on light...');
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    //alert('Turning on light...');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    //alert('Failed to turn on light.');
+                });
+            // alert('Turning on light...');
         }
+
 
         function turnOffLight() {
             /// Assuming you want to turn on the light with a POST request
@@ -112,22 +113,23 @@
                 // You can pass data in the body if required
                 // body: JSON.stringify({ key1: 'value1', key2: 'value2' })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                //alert('Turning on light...');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                //alert('Failed to turn on light.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    //alert('Turning on light...');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    //alert('Failed to turn on light.');
+                });
             //alert('Turning off light...');
         }
+
 
         function toggleAnotherLed() {
             // Use AJAX or other methods to send a request to toggle another LED
             //alert('Toggling another LED...');
-                        /// Assuming you want to turn on the light with a POST request
+            /// Assuming you want to turn on the light with a POST request
             fetch('http://192.168.1.22/api/toggle_light', {
                 method: 'POST',
                 headers: {
@@ -137,23 +139,23 @@
                 // You can pass data in the body if required
                 // body: JSON.stringify({ key1: 'value1', key2: 'value2' })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                //alert('Turning on light...');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                //alert('Failed to turn on light.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    //alert('Turning on light...');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    //alert('Failed to turn on light.');
+                });
             //alert('Turning off light...');
         }
 
         // New JavaScript functions for face recognition actions
         function reRecognizeFaces() {
             // Use AJAX or other methods to send a request for re-recognizing faces
-            alert('Re-recognizing faces...');
         }
+
         function storeFace() {
             // Get the face name from the input field
             let faceName = document.getElementById("faceNameInput").value;

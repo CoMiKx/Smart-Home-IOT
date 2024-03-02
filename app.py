@@ -3,8 +3,6 @@ from flask import Flask, render_template, Response, request, jsonify
 import cv2
 import face_recognition as face_rec
 import requests
-from line_notify import LineNotify
-import time
 import threading
 
 app = Flask(__name__)
@@ -247,4 +245,5 @@ def video_feed():
 
 
 if __name__ == '__main__':
+    # --host 0.0.0.0 --port 5000
     app.run(host='0.0.0.0', port=5000, debug=True)
