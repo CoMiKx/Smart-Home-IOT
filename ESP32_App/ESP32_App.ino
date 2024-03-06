@@ -9,8 +9,9 @@
 const char *ssid = "WiFi_314 - 2.4G";
 const char *password = "Baramee2303";
 
-int ledPin = 2;     // Pin number for the LED
-int ledTogglePin = 23;     // Pin number for the LED
+int ledGreen = 19;     // Pin number for the LED
+int ledBlue = 18;     // Pin number for the LED
+int ledRed = 23;     // Pin number for the LED
 int buttonPin = 21; // Pin number for the button
 int buzzer = 22;    // Pin number for the buzzer
 
@@ -18,6 +19,7 @@ WebServer server(80);
 
 volatile bool buttonPressed = false;
 volatile bool isRecognize = false;
+volatile bool isLock = false;
 unsigned long lastFaceRecognizedTime = 0;
 const unsigned long recognitionTimeout = 20000; // 20 seconds in milliseconds
 
@@ -44,6 +46,7 @@ void getRestartRecognizeProcess() {
     Serial.println("Error restarting recognition process");
   }
   http.end();
+  isLock = true;
 }
 
 void sendDataToSheet(String log) {
@@ -68,10 +71,12 @@ void setup() {
   Serial.begin(9600);
   delay(10);
 
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
-  pinMode(ledTogglePin, OUTPUT);
-  digitalWrite(ledTogglePin, LOW);
+  pinMode(ledGreen, OUTPUT);
+  digitalWrite(ledGreen, LOW);
+  pinMode(ledBlue, OUTPUT);
+  digitalWrite(ledBlue, LOW);
+  pinMode(ledRed, OUTPUT);
+  digitalWrite(ledRed, LOW);
 
   pinMode(buttonPin, INPUT_PULLUP); // Configure button pin as input with internal pull-up resistor
   pinMode(buzzer, OUTPUT);
@@ -96,23 +101,24 @@ void setup() {
   LINE.setToken(LINE_TOKEN);
 
   // Setup API routes
-  server.on("/api/turn_on_light", HTTP_POST, []() {
-    digitalWrite(ledPin, HIGH);
+  server.on("/api/toggle_light_green", HTTP_POST, []() {
+    digitalWrite(ledGreen, !digitalRead(ledGreen));
     server.send(200, "text/plain", "Light turned on");
   });
 
-  server.on("/api/turn_off_light", HTTP_POST, []() {
-    digitalWrite(ledPin, LOW);
+  server.on("/api/toggle_light_blue", HTTP_POST, []() {
+    digitalWrite(ledBlue, !digitalRead(ledBlue));
     server.send(200, "text/plain", "Light turned off");
   });
 
-  server.on("/api/toggle_light", HTTP_POST, []() {
-    digitalWrite(ledTogglePin, !digitalRead(ledTogglePin));
+  server.on("/api/toggle_light_red", HTTP_POST, []() {
+    digitalWrite(ledRed, !digitalRead(ledRed));
   server.send(200, "text/plain", "Light is toggle");
   });
 
   server.on("/api/face_recognized", HTTP_POST, []() {
     server.send(200, "text/plain", "Buzzer turned on");
+    isLock = false;
     digitalWrite(buzzer, LOW);
     delay(500);
     digitalWrite(buzzer, HIGH);
@@ -129,13 +135,13 @@ void setup() {
 void loop() {
   server.handleClient();
   
-  if (buttonPressed) {
+  if (buttonPressed && !isLock) {
     buttonPressed = false; // Reset the flag
     getRestartRecognizeProcess();
   }
   
   // Check if it's time to restart recognition process
-  if (millis() - lastFaceRecognizedTime >= recognitionTimeout && isRecognize) {
+  if (millis() - lastFaceRecognizedTime >= recognitionTimeout && isRecognize && !isLock) {
     getRestartRecognizeProcess();
     isRecognize = false;
   }

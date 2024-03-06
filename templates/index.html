@@ -68,19 +68,19 @@
 <body>
     <div id="container">
         <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
-        <button onclick="turnOnLight()">Turn On Light</button>
-        <button onclick="turnOffLight()">Turn Off Light</button>
-        <button onclick="toggleAnotherLed()">Toggle Another LED</button>
+        <button onclick="toggleLedGreen()">Toggle LED Green</button>
+        <button onclick="toggleLedBlue()">Toggle LED Blue</button>
+        <button onclick="toggleLedRed()">Toggle LED Red</button>
         <label for="faceNameInput"></label><input type="text" id="faceNameInput" placeholder="Enter Face Name">
         <div></div>
-        <button onclick="reRecognizeFaces()">Re-Recognize Faces</button>
+        <button onclick="reRecognizeFaces()">Delete Face</button>
         <button onclick="storeFace()">Store Face</button>
     </div>
 
     <script>
-        function turnOnLight() {
+        function toggleLedGreen() {
             // Assuming you want to turn on the light with a POST request
-            fetch('http://192.168.1.22/api/turn_on_light', {
+            fetch('http://192.168.1.22/api/toggle_light_green', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded', // Set the content type based on your server's expectations
@@ -102,9 +102,9 @@
         }
 
 
-        function turnOffLight() {
+        function toggleLedBlue() {
             /// Assuming you want to turn on the light with a POST request
-            fetch('http://192.168.1.22/api/turn_off_light', {
+            fetch('http://192.168.1.22/api/toggle_light_blue', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded', // Set the content type based on your server's expectations
@@ -126,11 +126,11 @@
         }
 
 
-        function toggleAnotherLed() {
+        function toggleLedRed() {
             // Use AJAX or other methods to send a request to toggle another LED
             //alert('Toggling another LED...');
             /// Assuming you want to turn on the light with a POST request
-            fetch('http://192.168.1.22/api/toggle_light', {
+            fetch('http://192.168.1.22/api/toggle_light_red', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded', // Set the content type based on your server's expectations
@@ -154,6 +154,27 @@
         // New JavaScript functions for face recognition actions
         function reRecognizeFaces() {
             // Use AJAX or other methods to send a request for re-recognizing faces
+            // Get the face name from the input field
+            let faceName = document.getElementById("faceNameInput").value;
+
+            if (!faceName) {
+                alert('Please enter a face name');
+                return;
+            }
+
+            // Use AJAX or other methods to send a request for storing a face with the provided name
+            alert('Delete face...');
+            // Example using fetch API
+            fetch('/delete_recognize_faces', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'face_name=' + encodeURIComponent(faceName),
+            })
+            .then(response => response.text())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
         }
 
         function storeFace() {
@@ -176,7 +197,7 @@
                 body: 'face_name=' + encodeURIComponent(faceName),
             })
             .then(response => response.text())
-            .then(data => alert(data))
+            .then(data => console.log(data))
             .catch(error => console.error('Error:', error));
         }
     </script>

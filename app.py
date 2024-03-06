@@ -4,6 +4,7 @@ import cv2
 import face_recognition as face_rec
 import requests
 import threading
+import numpy as np
 
 app = Flask(__name__)
 
@@ -135,53 +136,61 @@ def send_to_line_notify(image_bytes, token, message):
     print("Response:", response.status_code, response.text)
 
 
-def trigger_face_recognition_actions(frame=None):
-    # You can customize this function based on your requirements
-    # For example, turn on lights and send Line Notify
-    # requests.post(f"{ESP32_API_URL}/turn_on_light")
-    # line_notify.send(message="Face recognized! Opened the door.")
+def process_face_recognition(frame, face_locations, reference_encodings):
     global is_recognize
-    face_locations = face_rec.face_locations(frame)
-    # Encode faces in the current frame
-    face_encodings = face_rec.face_encodings(frame, face_locations)
-    # Check each reference face against faces in the frame
-    for face_encoding in face_encodings:
-        for name, reference_encoding in reference_encodings.items():
-            results = face_rec.compare_faces([reference_encoding], face_encoding)
-            print("this is result[0] -> ", results, name)
-            if results[0]:
-                # Draw rectangles around the faces and display the name
-                for (top, right, bottom, left) in face_locations:
-                    #cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
-                    font = cv2.FONT_HERSHEY_DUPLEX
-                    frame = cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
-                # Convert frame to JPEG format
-                jpeg_image = convert_to_jpeg(frame)
+    for face_encoding in face_rec.face_encodings(frame, face_locations):
+        distances = face_rec.face_distance(list(reference_encodings.values()), face_encoding)
+        best_match_index = np.argmin(distances)
+        if distances[best_match_index] < 0.38:  # Adjust this threshold as needed
+            is_recognize = True
+            name = list(reference_encodings.keys())[best_match_index]
+            # Add drawing and labeling logic here as needed
+            print("threshold", distances[best_match_index], "Name:", name)
+            # Draw rectangles and display name as before
+            for (top, right, bottom, left) in face_locations:
+                cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+                cv2.putText(frame, name, (left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), 1)
 
-                # Message to accompany the image
-                message = "Frame captured from camera"
+            # Convert frame to JPEG format
+            jpeg_image = convert_to_jpeg(frame)
+            # Message to accompany the image
+            message = "Frame captured from camera"
+            # Create and start threads for Line Notify and ESP32 API
+            line_notify_thread = threading.Thread(target=send_to_line_notify_async, args=(jpeg_image, line_token, message))
+            esp32_api_thread = threading.Thread(target=post_to_esp32_api_async, args=(name,))
+            line_notify_thread.start()
+            esp32_api_thread.start()
 
-                # Create and start threads for Line Notify and ESP32 API
-                line_notify_thread = threading.Thread(target=send_to_line_notify_async, args=(jpeg_image, line_token, message))
-                esp32_api_thread = threading.Thread(target=post_to_esp32_api_async, args=(name,))
-                line_notify_thread.start()
-                esp32_api_thread.start()
-
-                # Wait for threads to finish
-                line_notify_thread.join()
-                esp32_api_thread.join()
-
-                print("Face recognized! Opened the door.")
-                is_recognize = True
+            # Wait for threads to finish
+            line_notify_thread.join()
+            esp32_api_thread.join()
+            print("Face recognized! Opened the door.", name)
 
 
-@app.route('/re_recognize_faces', methods=['POST'])
-def re_recognize_faces():
-    # Logic for re-recognizing faces (triggered by the "Re-Recognize Faces" button)
-    # You can implement face recognition with your known faces database
-    # ...
+def trigger_face_recognition_actions(frame=None):
+    global is_recognize
+    if not is_recognize:
+        face_locations = face_rec.face_locations(frame)
+        # Start the face recognition in a new thread to avoid blocking the main thread
+        threading.Thread(target=process_face_recognition, args=(frame, face_locations, reference_encodings)).start()
 
-    return "Re-recognized faces"
+
+@app.route('/delete_recognize_faces', methods=['POST'])
+def delete_recognize_faces():
+    global reference_encodings
+    # Get the user-inputted face name
+    face_name = request.form.get('face_name')
+
+    if face_name is not None:
+        delete_path = os.path.join('pictures', f'{face_name}.jpg')
+        print(delete_path)
+        os.remove(delete_path)
+        message = f"Face '{face_name}' delete successfully"
+        reference_encodings = load_reference_images(reference_folder_path)
+    else:
+        message = "Error: Face name is required"
+
+    return jsonify(message=message), 200
 
 
 @app.route('/restart_recognize_process', methods=['GET'])
@@ -197,6 +206,7 @@ def restart_recognize_process():
 
 @app.route('/store_face', methods=['POST'])
 def store_face():
+    global reference_encodings
     # Get the user-inputted face name
     face_name = request.form.get('face_name')
 
@@ -212,26 +222,19 @@ def store_face():
         print(save_path)
         cv2.imwrite(save_path, frame)
         message = f"Face '{face_name}' stored successfully"
+        reference_encodings = load_reference_images(reference_folder_path)
     else:
         message = "Error capturing face"
 
     return jsonify(message=message), 200
 
 
-# Face recognition route
-@app.route('/face_recognition', methods=['POST'])
-def face_recognition():
-    # You can add more logic here, such as storing recognized faces or triggering specific actions
-    trigger_face_recognition_actions()
-    return "Face recognition completed"
-
-
-# Line Notify integration route
-@app.route('/send_line_notify', methods=['POST'])
-def send_line_notify():
-    message = request.form.get('message')
-    # line_notify.send(message=message)
-    return "Line Notify message sent"
+# # Face recognition route
+# @app.route('/face_recognition', methods=['POST'])
+# def face_recognition():
+#     # You can add more logic here, such as storing recognized faces or triggering specific actions
+#     trigger_face_recognition_actions()
+#     return "Face recognition completed"
 
 
 @app.route('/')
